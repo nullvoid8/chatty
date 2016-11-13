@@ -15,6 +15,7 @@ import chatty.User;
 import chatty.util.api.usericons.Usericon;
 import chatty.gui.components.menus.ContextMenuListener;
 import chatty.util.DateTime;
+import chatty.util.ImageCache;
 import chatty.util.StringUtil;
 import chatty.util.api.CheersUtil;
 import chatty.util.api.Emoticon;
@@ -36,14 +37,19 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Map.Entry;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import static javax.swing.JComponent.WHEN_FOCUSED;
 import javax.swing.border.Border;
@@ -1664,8 +1670,11 @@ public class ChannelTextPane extends JTextPane implements LinkListener, Emoticon
         // The style of the stuff (basicially metadata)
         HashMap<Integer,MutableAttributeSet> rangesStyle = new HashMap<>();
         
+        // Images attached to styles, will be used with some placeholder text.
+        List<MutableAttributeSet> images = new ArrayList<>();
+        
         if (!ignoreLinks) {
-            findLinks(text, ranges, rangesStyle);
+            findLinks(text, ranges, rangesStyle, images);
         }
         
         if (styles.showEmoticons()) {
@@ -1695,7 +1704,14 @@ public class ChannelTextPane extends JTextPane implements LinkListener, Emoticon
         if (lastPrintedPos < text.length()) {
             print(processText(user, text.substring(lastPrintedPos)), style);
         }
+
+        print("\n", style);
         
+        //Print all the found image urls at the end.
+        for (MutableAttributeSet imgStyle : images) {
+			print("picture", imgStyle);
+			print(" ", style);
+		}
     }
     
     /**
@@ -1721,7 +1737,7 @@ public class ChannelTextPane extends JTextPane implements LinkListener, Emoticon
     }
     
     private void findLinks(String text, Map<Integer, Integer> ranges,
-            Map<Integer, MutableAttributeSet> rangesStyle) {
+            Map<Integer, MutableAttributeSet> rangesStyle, List<MutableAttributeSet> imageStyles) {
         // Find links
         urlMatcher.reset(text);
         while (urlMatcher.find()) {
@@ -1744,8 +1760,39 @@ public class ChannelTextPane extends JTextPane implements LinkListener, Emoticon
                     }
                     rangesStyle.put(start, styles.url(foundUrl));
                 }
+                
+                if (isImageUrl(foundUrl)) {
+                	
+                	try {
+                		ImageIcon img = ImageCache.getImage(new URL(foundUrl), "inline", 60*60*24);
+                		
+                		MutableAttributeSet style = styles.url(foundUrl);
+                		style.addAttribute("start", start);
+                		StyleConstants.setIcon(style, img);
+                		
+                		imageStyles.add(style);
+            		} catch (MalformedURLException ex) {
+                		//Just move on.
+                	}
+                	
+                }
+                
             }
         }
+    }
+    
+    
+    private static boolean isImageUrl(String url) {
+		
+    	List<String> formats = Arrays.asList(ImageIO.getReaderFileSuffixes());
+    	
+    	int formatsep = url.lastIndexOf('.');
+    	if (formatsep < 0) { return false; }
+    	
+    	String format = url.substring(formatsep + 1);
+    	
+    	return formats.contains(format);
+
     }
     
     
