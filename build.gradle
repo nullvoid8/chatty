@@ -5,6 +5,7 @@ plugins {
 }
 
 apply plugin: 'java'
+apply plugin: 'eclipse'
 
 // This seems to fix non-ASCII characters in the code not appearing correctly after compiling
 compileJava.options.encoding = 'UTF-8'

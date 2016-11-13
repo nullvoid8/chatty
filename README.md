@@ -1,3 +1,13 @@
+Chatty - With Inline Images
+======
+
+This is a modification of chatty to show image links in the chat window as they are posted
+
+By nullvoid8 
+
+Below is the original readme
+
+
 Chatty
 ======
 
