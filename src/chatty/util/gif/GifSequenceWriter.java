@@ -70,7 +70,7 @@ public class GifSequenceWriter {
       root,
       "GraphicControlExtension");
 
-    graphicsControlExtensionNode.setAttribute("disposalMethod", "restoreToBackgroundColor");
+    graphicsControlExtensionNode.setAttribute("disposalMethod", "none");
     graphicsControlExtensionNode.setAttribute("userInputFlag", "FALSE");
     graphicsControlExtensionNode.setAttribute(
       "transparentColorFlag",

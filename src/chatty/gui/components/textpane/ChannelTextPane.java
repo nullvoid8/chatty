@@ -1705,13 +1705,17 @@ public class ChannelTextPane extends JTextPane implements LinkListener, Emoticon
             print(processText(user, text.substring(lastPrintedPos)), style);
         }
 
-        print("\n", style);
-        
-        //Print all the found image urls at the end.
-        for (MutableAttributeSet imgStyle : images) {
-			print("picture", imgStyle);
-			print(" ", style);
-		}
+        if (! images.isEmpty()) {
+	        print("\n", style);
+	        
+	        //Print all the found image urls at the end.
+	        for (MutableAttributeSet imgStyle : images) {
+				print("picture", imgStyle);
+				print(" \n", style);
+			}
+	        
+	        print("\n", style);
+        }
     }
     
     /**
